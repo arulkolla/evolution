@@ -22,13 +22,16 @@ class Creature {
   float getSize() {return size;}
   
   void display() {
+    stroke(0);
     strokeWeight(2);
     fill(this.col);
     circle(this.pos.x, this.pos.y, 2 * size);
   }  
   
   void checkEdges() {
-      
+    if (dist(this.pos.x, this.pos.y, width / 2, height / 2) >= min(width / 2 - MARGIN, height / 2 - MARGIN) - this.size) {
+      this.vel.rotate(HALF_PI);
+    }  
   }  
   
   void update() {
@@ -64,6 +67,7 @@ void setup() {
 void draw() {
   for (Creature c : pop) {
     c.update();
+    c.checkEdges();
     c.display();
   } 
 } 
