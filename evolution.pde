@@ -2,7 +2,7 @@ final int MARGIN = 50;
 final int MIN_RADIUS = 5, MAX_RADIUS = 15;
 
 ArrayList<Creature> pop = new ArrayList<Creature>();
-int popSize = 20;
+int popSize = 40;
 
 class Creature {
   float size, limit; // size is radius
@@ -29,8 +29,11 @@ class Creature {
   }  
   
   void checkEdges() {
-    if (dist(this.pos.x, this.pos.y, width / 2, height / 2) >= min(width / 2 - MARGIN, height / 2 - MARGIN) - this.size) {
-      this.vel.rotate(HALF_PI);
+    PVector oldPos = this.pos;
+    if (dist(this.pos.x, this.pos.y, width / 2, height / 2) + this.size >= min(width / 2 - MARGIN, height / 2 - MARGIN) + MAX_RADIUS) {
+      this.pos = oldPos;
+      PVector v = PVector.fromAngle(atan2(height / 2 - this.pos.y, width / 2 - this.pos.x));
+      this.vel.set(v);
     }  
   }  
   
@@ -43,11 +46,17 @@ class Creature {
   }
 } 
 
+void drawBack() {
+  background(140, 71, 41);
+  strokeWeight(2);
+  fill(0, 80, 28);
+  int circleRadius = min(width / 2 - MARGIN, height / 2 - MARGIN);
+  circle(width / 2, height / 2, 2 * (circleRadius + MAX_RADIUS)); 
+}  
+
 void setup() {
   size(600, 600);
   frameRate(30);  
-  
-  background(140, 71, 41); 
   
   int circleRadius = min(width / 2 - MARGIN, height / 2 - MARGIN);
   
@@ -57,14 +66,13 @@ void setup() {
   } 
   
   strokeWeight(2);
-  fill(0, 80, 28);
-  circle(width / 2, height / 2, 2 * (circleRadius + MAX_RADIUS)); 
   for (Creature c : pop) {
     c.display();
-  }  
+  } 
 }
 
 void draw() {
+  drawBack(); 
   for (Creature c : pop) {
     c.update();
     c.checkEdges();
