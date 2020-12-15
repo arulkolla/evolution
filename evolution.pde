@@ -2,11 +2,13 @@ final int MARGIN = 50;
 final int MIN_RADIUS = 5, MAX_RADIUS = 15;
 final float LIMIT = 5;
 final float FOOD_ENERGY = 25;
+final float MOVEMENT_PENALTY = 0.055;
 final float REPRODUCTION_THRESHOLD = 25;
 final float MUTATION_PROB = 0.01, MUTATION_SIZE = 0.9;
+final int NUM_GENS = 5, LIFETIME = 75;
 
 boolean go = true;
-int lifetime, counter;
+int lifetime, counter, gen;
 World world;
 
 class World {
@@ -94,7 +96,7 @@ class World {
     void move() {
       this.update();
       this.checkEdges();
-      this.health -= 0.02 * size;
+      this.health -= MOVEMENT_PENALTY * size; //lose energy by moving
       if (this.health <= 0) {this.die();}
     }  
   } 
@@ -188,7 +190,6 @@ class World {
     for (int i = 0; i < popSize; i++) {
       Creature now = new Creature(circleRadius * cos(TAU * i / popSize) + width / 2, circleRadius * sin(TAU * i / popSize) + height / 2, random(MIN_RADIUS, MAX_RADIUS), i);
       pop.add(now);
-            print(now.pos); print('\n');
     } 
     
     PVector toMiddle = new PVector(width / 2, height / 2);
@@ -284,35 +285,56 @@ class World {
         }
       }  
     }
+  }
+  
+  void printSizes() {
+    print("=SPLIT(\"");
+    for (Creature c : pop) {
+      if (c.size > 0) {print(c.size); print(", ");}
+    }
+    print("\", \", \")");
+	print("\n");
   }  
 }  
 
 void setup() {
   size(600, 600);
   frameRate(30); 
-  lifetime = 250;
+  // PFont mon = createFont("andalemo.ttf", 16); textFont(mon);
+  lifetime = LIFETIME;
   counter = 0;
+  gen = 1;
   world = new World();
   world.mark();
 }
 
 void draw() {
-  if (counter < lifetime) {
+  if (gen <= NUM_GENS && counter < lifetime) {
     counter++;
     world.run();
     fill(255, 255, 255);
-    text(counter, 20, 20);
+    text(LIFETIME - counter, 30, 30);
+    text(gen, 30, 50);
   }
-  else {
+  else if (gen <= NUM_GENS) {
     counter = 0;
+    gen++;
     world.reproduce();
     world.remark();
+  } 
+  else {
+    noLoop();
+    world.printSizes();
+    exit();
   }  
 } 
   
 void keyTyped() {
   if (int(key) == 32) {
-    if (go == true) {noLoop(); go = false;}
+    if (go == true) {
+    noLoop(); go = false;
+    world.printSizes();
+  }
     else {loop(); go = true;}
   }  
 }
